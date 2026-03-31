@@ -1,68 +1,42 @@
-# ========================
-# 🔐 ENV VARIABLES (CRITICAL)
-# ========================
+# ENV VARIABLES (CRITICAL)
 .env
 .env.*
 !.env.example
-
-# ========================
-# 📦 NODE MODULES
-# ========================
+# NODE MODULES
 node_modules/
-
-# ========================
-# 🧾 LOG FILES
-# ========================
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# ========================
-# 🧪 TEST / COVERAGE
-# ========================
+# TEST / COVERAGE
 coverage/
 .nyc_output/
 
-# ========================
-# ⚙️ BUILD FILES
-# ========================
+# BUILD FILES
 dist/
 build/
-
-# ========================
-# 🗄️ DATABASE / TEMP FILES
-# ========================
+# DATABASE / TEMP FILES
 *.sqlite
 *.db
 
-# ========================
-# 🔐 SECURITY FILES
-# ========================
+# SECURITY FILES
 *.pem
 *.key
 *.cert
 
-# ========================
-# 🧠 CACHE
-# ========================
+#CACHE
 .cache/
 
-# ========================
-# 🧑‍💻 IDE / EDITOR
-# ========================
+# IDE / EDITOR
 .vscode/
 .idea/
 
-# ========================
-# 💻 OS FILES
-# ========================
+# OS FILES
 .DS_Store
 Thumbs.db
 
-# ========================
-# 🔁 MISC
-# ========================
+# MISC
 *.tgz
 *.zip
