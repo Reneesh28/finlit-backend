@@ -12,7 +12,17 @@ const connectDB = require('./config/db');
 connectDB();
 
 const authRoutes = require('./routes/authRoutes');
+const transactionRoutes = require('./routes/TransactionRouters');
+const budgetRoutes = require('./routes/BudgetRoutes');
+const profileRoutes = require('./routes/ProfileRoutes');
+
+
 app.use('/api/auth', authRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/budget', budgetRoutes);
+app.use('/api/profile', profileRoutes);
+
+
 
 app.get('/', (req, res) => {
   res.send('Backend is running');
