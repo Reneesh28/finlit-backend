@@ -3,7 +3,7 @@ const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const slowDown = require('express-slow-down');
 
-const { registerUser, loginUser } = require('../controllers/authController');
+const { registerUser, loginUser } = require('../controllers/authControllers');
 
 // Rate limiters
 const loginLimiter = rateLimit({
