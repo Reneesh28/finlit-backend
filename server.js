@@ -15,12 +15,13 @@ const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/TransactionRouters');
 const budgetRoutes = require('./routes/BudgetRoutes');
 const profileRoutes = require('./routes/ProfileRoutes');
-
+const chatRoutes = require('./routes/chatRoute');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/budget', budgetRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/chat', chatRoutes);
 
 
 
