@@ -7,8 +7,6 @@ const generateToken = (userId) => {
   });
 };
 
-const bcrypt = require('bcrypt');
-
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -18,12 +16,11 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10); // ✅ ADD THIS
-
+    // ✅ NO HASHING HERE (model handles it)
     const user = await User.create({
       name,
       email,
-      password: hashedPassword // ✅ USE HASHED PASSWORD
+      password
     });
 
     const token = generateToken(user._id);
@@ -40,7 +37,7 @@ const registerUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error); // 👈 ADD THIS FOR DEBUG
+    console.error(error); // ✅ DEBUG
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -76,6 +73,7 @@ const loginUser = async (req, res) => {
     });
 
   } catch (error) {
+    console.error(error); // ✅ DEBUG
     res.status(500).json({ message: 'Server error' });
   }
 };
