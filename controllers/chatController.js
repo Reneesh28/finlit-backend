@@ -2,10 +2,44 @@ const asyncHandler = require('express-async-handler');
 const APIUsage = require('../models/apiUsage');
 const { sendMessageToAI } = require('../services/aiService');
 const ChatHistory = require('../models/chatHistory');
+const FinancialProfile = require('../models/financialProfile');
+const Transaction = require('../models/transaction');
 
 // 🔢 Token estimation helper
 const estimateTokens = (text) => {
     return Math.ceil(text.split(/\s+/).length * 1.3);
+};
+
+// ✂️ Limit history (last N messages)
+const trimHistory = (messages, limit = 10) => {
+    if (!messages) return [];
+    return messages.slice(-limit);
+};
+
+// 🧠 Build financial context
+const buildFinancialContext = async (userId) => {
+    const profile = await FinancialProfile.findOne({ user: userId });
+
+    const transactions = await Transaction.find({ user: userId })
+        .sort({ date: -1 })
+        .limit(5);
+
+    return {
+        profile: profile
+            ? {
+                monthlyIncome: profile.monthlyIncome,
+                savingsGoal: profile.savingsGoal,
+                fixedExpenses: profile.fixedExpenses,
+                variableExpenses: profile.variableExpenses,
+                financialHealthScore: profile.financialHealthScore
+            }
+            : null,
+        recentTransactions: transactions.map((t) => ({
+            type: t.type,
+            amount: t.amount,
+            category: t.category
+        }))
+    };
 };
 
 const sendMessage = asyncHandler(async (req, res) => {
@@ -32,41 +66,25 @@ const sendMessage = asyncHandler(async (req, res) => {
         });
     }
 
-    // Reset if new day
     if (usage.lastRequestDate?.toISOString().split('T')[0] !== today) {
         usage.requestsToday = 0;
         usage.tokensToday = 0;
     }
 
-    // 🚦 Request limit
     if (usage.requestsToday >= 50) {
         res.status(429);
         throw new Error('Daily limit reached');
     }
 
-    // 🔢 Token limit (7500/day)
     if (usage.tokensToday >= 7500) {
         res.status(429);
         throw new Error('Daily token limit reached');
     }
     // =====================================================
 
-    const aiResponse = await sendMessageToAI(message);
-
-    // 🔢 Token calculation
-    const inputTokens = estimateTokens(message);
-    const outputTokens = estimateTokens(aiResponse);
-    const totalTokens = inputTokens + outputTokens;
-
-    // 🔢 Prevent overflow in same request
-    if (usage.tokensToday + totalTokens > 7500) {
-        res.status(429);
-        throw new Error('Token limit exceeded for today');
-    }
-
     let chat;
+    let history = [];
 
-    // ✅ Existing chat
     if (chatId) {
         chat = await ChatHistory.findById(chatId);
 
@@ -75,15 +93,41 @@ const sendMessage = asyncHandler(async (req, res) => {
             throw new Error('Chat not found');
         }
 
+        if (chat.user.toString() !== userId.toString()) {
+            res.status(403);
+            throw new Error('Not authorized to access this chat');
+        }
+
+        history = trimHistory(chat.messages);
+    }
+
+    // 🧠 FETCH FINANCIAL CONTEXT
+    const financialContext = await buildFinancialContext(userId);
+
+    // 🤖 AI CALL WITH CONTEXT + USER DATA
+    const aiResponse = await sendMessageToAI({
+        message,
+        history,
+        financialContext
+    });
+
+    const inputTokens = estimateTokens(message);
+    const outputTokens = estimateTokens(aiResponse);
+    const totalTokens = inputTokens + outputTokens;
+
+    if (usage.tokensToday + totalTokens > 7500) {
+        res.status(429);
+        throw new Error('Token limit exceeded for today');
+    }
+
+    if (chatId) {
         chat.messages.push(
             { role: 'user', content: message, tokensUsed: inputTokens },
             { role: 'assistant', content: aiResponse, tokensUsed: outputTokens }
         );
 
         await chat.save();
-    }
-    // ✅ New chat
-    else {
+    } else {
         chat = await ChatHistory.create({
             user: userId,
             title: title || 'New Chat',
@@ -99,7 +143,6 @@ const sendMessage = asyncHandler(async (req, res) => {
     usage.tokensToday += totalTokens;
     usage.lastRequestDate = new Date();
 
-    // 📊 Monthly tracking
     const currentMonth = new Date().toISOString().slice(0, 7);
 
     let monthData = usage.monthlyUsage.find(m => m.month === currentMonth);
@@ -145,7 +188,6 @@ const getChatById = asyncHandler(async (req, res) => {
         throw new Error('Chat not found');
     }
 
-    // 🔐 Ensure user owns this chat
     if (chat.user.toString() !== userId.toString()) {
         res.status(403);
         throw new Error('Not authorized to access this chat');
@@ -165,7 +207,6 @@ const deleteChat = asyncHandler(async (req, res) => {
         throw new Error('Chat not found');
     }
 
-    // 🔐 Ownership check
     if (chat.user.toString() !== userId.toString()) {
         res.status(403);
         throw new Error('Not authorized to delete this chat');

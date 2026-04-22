@@ -30,4 +30,7 @@ const financialProfileSchema = new mongoose.Schema({
     timestamps: true
 });
 
-module.exports = mongoose.model('FinancialProfile', financialProfileSchema);
+// ✅ FIX (prevents overwrite error)
+module.exports =
+    mongoose.models.FinancialProfile ||
+    mongoose.model('FinancialProfile', financialProfileSchema);
