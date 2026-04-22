@@ -42,12 +42,11 @@ const chatHistorySchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// 🔄 Auto-update lastUpdated when messages change
-chatHistorySchema.pre('save', function (next) {
+// ✅ FIXED pre-save hook (NO async + safe next usage)
+chatHistorySchema.pre('save', function () {
     if (this.isModified('messages')) {
         this.lastUpdated = Date.now();
     }
-    next();
 });
 
 module.exports = mongoose.model('ChatHistory', chatHistorySchema);
