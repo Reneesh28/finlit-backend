@@ -124,6 +124,61 @@ const sendMessage = asyncHandler(async (req, res) => {
     });
 });
 
+const getChats = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const chats = await ChatHistory.find({ user: userId })
+        .select('_id title lastUpdated')
+        .sort({ lastUpdated: -1 });
+
+    res.status(200).json(chats);
+});
+
+const getChatById = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const { id } = req.params;
+
+    const chat = await ChatHistory.findById(id);
+
+    if (!chat) {
+        res.status(404);
+        throw new Error('Chat not found');
+    }
+
+    // 🔐 Ensure user owns this chat
+    if (chat.user.toString() !== userId.toString()) {
+        res.status(403);
+        throw new Error('Not authorized to access this chat');
+    }
+
+    res.status(200).json(chat);
+});
+
+const deleteChat = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const { id } = req.params;
+
+    const chat = await ChatHistory.findById(id);
+
+    if (!chat) {
+        res.status(404);
+        throw new Error('Chat not found');
+    }
+
+    // 🔐 Ownership check
+    if (chat.user.toString() !== userId.toString()) {
+        res.status(403);
+        throw new Error('Not authorized to delete this chat');
+    }
+
+    await chat.deleteOne();
+
+    res.status(200).json({ message: 'Chat deleted successfully' });
+});
+
 module.exports = {
-    sendMessage
+    sendMessage,
+    getChats,
+    getChatById,
+    deleteChat
 };
