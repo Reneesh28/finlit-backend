@@ -2,10 +2,14 @@ const express = require('express');
 const router = express.Router();
 
 const protect = require('../middleware/authMiddleware');
-const { setBudget, getBudgets } = require('../controllers/BudgetControllers');
+const {
+    setBudget,
+    getBudgets
+} = require('../controllers/BudgetControllers');
 
-// Protected route
-router.post('/', protect, setBudget);
+const { validateBudget, validate } = require('../middleware/validationMiddleware');
+
+router.post('/', protect, validateBudget, validate, setBudget);
 router.get('/', protect, getBudgets);
 
 module.exports = router;

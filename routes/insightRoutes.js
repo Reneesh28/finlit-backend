@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const { getSpendingDistribution } = require('../controllers/insightController');
-const authMiddleware = require('../middleware/authMiddleware');
+const protect = require('../middleware/authMiddleware');
+const { getInsights } = require('../controllers/insightController');
 
-router.get('/', authMiddleware, getSpendingDistribution);
+// ✅ FINAL ROUTE
+router.get('/', protect, getInsights);
 
 module.exports = router;

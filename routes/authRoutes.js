@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const slowDown = require('express-slow-down');
 
 const { registerUser, loginUser } = require('../controllers/authControllers');
+const { validateRegister, validateLogin } = require('../middleware/validationMiddleware');
 
 // Rate limiters
 const loginLimiter = rateLimit({
@@ -26,7 +27,19 @@ const loginSpeedLimiter = slowDown({
 });
 
 // Routes
-router.post('/register', registerLimiter, registerUser);
-router.post('/login', loginLimiter, loginSpeedLimiter, loginUser);
+router.post(
+  '/register',
+  registerLimiter,
+  validateRegister,
+  registerUser
+);
+
+router.post(
+  '/login',
+  loginLimiter,
+  loginSpeedLimiter,
+  validateLogin,
+  loginUser
+);
 
 module.exports = router;

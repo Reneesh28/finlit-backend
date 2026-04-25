@@ -12,11 +12,13 @@ const budgetSchema = new mongoose.Schema({
     },
     limit: {
         type: Number,
-        required: true
+        required: true,
+        min: 0 // ✅ FIX
     },
     spent: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0 // ✅ FIX
     },
     month: {
         type: String,
