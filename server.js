@@ -23,6 +23,7 @@ const budgetRoutes = require('./routes/BudgetRoutes');
 const profileRoutes = require('./routes/ProfileRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const insightRoutes = require('./routes/insightRoutes');
+const quizRoutes = require('./routes/quizRoutes');
 
 // 🚀 Route Mounting
 app.use('/api/auth', authRoutes);
@@ -31,6 +32,7 @@ app.use('/api/budget', budgetRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/insights', insightRoutes);
+app.use('/api/quiz', quizRoutes);
 
 // 🏠 Health Check
 app.get('/', (req, res) => {
