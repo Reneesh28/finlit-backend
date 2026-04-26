@@ -64,6 +64,9 @@ The server will be available at `http://localhost:5000`.
 | `/api/transactions` | Transaction management (Income/Expenses) |
 | `/api/budget` | Budget planning and tracking |
 | `/api/profile` | User financial profile and settings |
+| `/api/insights` | Smart financial analysis and trends |
+| `/api/quiz` | Gamified financial literacy quizzes |
+| `/api/chat` | AI Coach session management |
 
 ## 📂 Project Structure
 
