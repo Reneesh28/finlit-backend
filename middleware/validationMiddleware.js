@@ -42,13 +42,15 @@ const validateTransaction = [
     body('category')
         .optional()
         .isIn([
-            'food',
-            'rent',
-            'transport',
-            'entertainment',
-            'utilities',
-            'salary',
-            'other'
+            'Food',
+            'Shopping',
+            'Digital',
+            'Housing',
+            'Income',
+            'Transport',
+            'Utilities',
+            'Entertainment',
+            'Other'
         ])
         .withMessage('Invalid category'),
 

@@ -124,8 +124,69 @@ const deleteTransaction = async (req, res) => {
 };
 
 
+// ✅ NEW: Update Transaction
+// @desc   Update transaction
+// @route  PUT /api/transactions/:id
+// @access Private
+const updateTransaction = async (req, res) => {
+    try {
+        let transaction = await Transaction.findById(req.params.id);
+
+        if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
+        }
+
+        // 🔐 Ownership check
+        if (transaction.user.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+
+        const { type, amount, category, description } = req.body;
+
+        // ✅ FIX: Adjust budget if expense/amount changed
+        if (transaction.type === 'expense') {
+            const currentMonth = transaction.date.toISOString().slice(0, 7);
+            const budget = await Budget.findOne({
+                user: req.user._id,
+                category: transaction.category,
+                month: currentMonth
+            });
+
+            if (budget) {
+                // Reverse old amount
+                budget.spent -= transaction.amount;
+                // Add new amount if still an expense
+                if (type === 'expense' || (!type && transaction.type === 'expense')) {
+                    budget.spent += amount || transaction.amount;
+                }
+                if (budget.spent < 0) budget.spent = 0;
+                await budget.save();
+            }
+        }
+
+        transaction = await Transaction.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            data: transaction
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
+
 module.exports = {
     addTransaction,
     getTransactions,
-    deleteTransaction
+    deleteTransaction,
+    updateTransaction
 };

@@ -349,15 +349,25 @@ const explainAnswers = async (req, res) => {
             correctAnswer: q.correctAnswer
         }));
 
+        // 🔥 AI CALL (FIXED)
         const aiRes = await axios.post(
             `${process.env.AI_SERVICE_URL}/explain-answers`,
-            { questions: formatted }
+            { questions: formatted },
+            {
+                headers: {
+                    "x-api-key": process.env.INTERNAL_API_KEY
+                }
+            }
         );
 
         res.status(200).json(aiRes.data);
 
     } catch (error) {
-        console.error("EXPLAIN ERROR:", error.message);
+        console.error(
+            "EXPLAIN ERROR:",
+            error.response?.data || error.message
+        );
+
         res.status(500).json({
             success: false,
             message: "Failed to generate explanations"
@@ -409,6 +419,36 @@ const generateQuizQuestions = async (req, res) => {
         });
     }
 };
+
+const triggerQuizGeneration = async (req, res) => {
+    try {
+        const aiRes = await axios.post(
+            `${process.env.AI_SERVICE_URL}/generate-quiz`,
+            {},
+            {
+                headers: {
+                    "x-api-key": process.env.INTERNAL_API_KEY,
+                    Authorization: req.headers.authorization
+                }
+            }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Quiz generated successfully",
+            data: aiRes.data
+        });
+
+    } catch (error) {
+        console.error("GENERATION ERROR:", error.response?.data || error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to generate quiz"
+        });
+    }
+};
+
 module.exports = {
     getQuizQuestions,
     submitQuiz,
@@ -416,5 +456,6 @@ module.exports = {
     getUserQuizAnalytics,
     getLeaderboard,
     explainAnswers,
-    generateQuizQuestions
+    generateQuizQuestions,
+    triggerQuizGeneration
 };

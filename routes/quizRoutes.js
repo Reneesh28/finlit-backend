@@ -8,7 +8,8 @@ const {
     getUserQuizAnalytics,
     getLeaderboard,
     explainAnswers,
-    generateQuizQuestions
+    generateQuizQuestions,
+    triggerQuizGeneration
 } = require('../controllers/quizController');
 
 const protect = require('../middleware/authMiddleware');
@@ -41,5 +42,7 @@ router.post(
     generateLimiter,
     generateQuizQuestions
 );
+
+router.post('/trigger', protect, triggerQuizGeneration);
 
 module.exports = router;

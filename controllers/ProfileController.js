@@ -51,22 +51,32 @@ const setFinancialProfile = async (req, res) => {
 
 const getFinancialProfile = async (req, res) => {
     try {
-        const profile = await FinancialProfile.findOne({
+        const financialProfile = await FinancialProfile.findOne({
             user: req.user._id
         });
 
-        if (!profile) {
-            return res.status(404).json({
-                message: 'Profile not found'
-            });
-        }
+        // Combine user basic info (XP, streak, etc.) with financial profile
+        const responseData = {
+            name: req.user.name,
+            email: req.user.email,
+            xp: req.user.xp,
+            streak: req.user.streak,
+            role: req.user.role,
+            financials: financialProfile || {
+                monthlyIncome: 0,
+                savingsGoal: 0,
+                fixedExpenses: 0,
+                variableExpenses: 0
+            }
+        };
 
         res.status(200).json({
             success: true,
-            data: profile
+            data: responseData
         });
 
     } catch (error) {
+        console.error("GET PROFILE ERROR:", error);
         res.status(500).json({
             success: false,
             message: 'Server error'

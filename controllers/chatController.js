@@ -2,8 +2,8 @@ const asyncHandler = require('express-async-handler');
 const APIUsage = require('../models/apiUsage');
 const { sendMessageToAI } = require('../services/aiService');
 const ChatHistory = require('../models/chatHistory');
-const FinancialProfile = require('../models/financialProfile');
-const Transaction = require('../models/transaction');
+const FinancialProfile = require('../models/FinancialProfile');
+const Transaction = require('../models/Transaction');
 
 // 🔢 Token estimation helper
 const estimateTokens = (text) => {
